@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PriceFinder KSA</title>
+    <style>
+        :root { --p: #059669; --bg: #f3f4f6; --card: #ffffff; }
+        * { box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg); margin: 0; padding-bottom: 80px; }
+        
+        /* Header */
+        .header { background: var(--p); color: white; padding: 20px; text-align: center; border-radius: 0 0 25px 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        
+        /* Search Bar */
+        .search-container { padding: 20px; }
+        input[type="text"], input[type="number"] { width: 100%; padding: 15px; border: none; border-radius: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); outline: none; font-size: 16px; }
+
+        /* Product Cards */
+        .product-list { padding: 0 20px; }
+        .product-card { background: var(--card); padding: 15px; border-radius: 20px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #e5e7eb; }
+        .store-name { font-size: 12px; color: #6b7280; font-weight: 600; text-transform: uppercase; }
+        .item-name { font-size: 18px; font-weight: 700; color: #111827; display: block; }
+        .price { font-size: 20px; font-weight: 800; color: var(--p); }
+
+        /* Navigation Bar */
+        .nav-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 15px; border-top: 1px solid #e5e7eb; }
+        .nav-item { border: none; background: none; color: #9ca3af; font-weight: 600; font-size: 14px; cursor: pointer; }
+        .nav-item.active { color: var(--p); }
+
+        /* Hidden Sections */
+        .hidden { display: none; }
+        .seller-form { padding: 20px; }
+        .btn { width: 100%; padding: 15px; background: var(--p); color: white; border: none; border-radius: 15px; font-weight: bold; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1 id="view-title">Find Products</h1>
+    </div>
+
+    <div id="consumer-view">
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="Search product (e.g. Milk, Bread)..." oninput="searchProducts()">
+        </div>
+        <div class="product-list" id="results">
+            </div>
+    </div>
+
+    <div id="seller-view" class="hidden">
+        <div class="seller-form">
+            <h3>Add New Price</h3>
+            <input type="text" id="seller-item" placeholder="Product Name"><br><br>
+            <input type="number" id="seller-price" placeholder="Price (SAR)"><br><br>
+            <input type="text" id="seller-store" placeholder="Your Store Name">
+            <button class="btn" onclick="addProduct()">List Product</button>
+        </div>
+    </div>
+
+    <div class="nav-bar">
+        <button class="nav-item active" id="btn-consumer" onclick="showView('consumer')">Consumer</button>
+        <button class="nav-item" id="btn-seller" onclick="showView('seller')">Seller</button>
+    </div>
+
+    <script>
+        // Mock Database (Since we don't have a real server yet)
+        let products = [
+            { name: "Almarai Milk 1L", price: 6.50, store: "Panda" },
+            { name: "Almarai Milk 1L", price: 6.00, store: "Lulu" },
+            { name: "BreadBundle", price: 1.50, store: "Tamimi" },
+            { name: "BreadBundle", price: 1.25, store: "Panda" }
+        ];
+
+        function showView(view) {
+            document.getElementById('consumer-view').classList.toggle('hidden', view !== 'consumer');
+            document.getElementById('seller-view').classList.toggle('hidden', view !== 'seller');
+            document.getElementById('btn-consumer').classList.toggle('active', view === 'consumer');
+            document.getElementById('btn-seller').classList.toggle('active', view === 'seller');
+            document.getElementById('view-title').innerText = view === 'consumer' ? "Find Products" : "Seller Portal";
+        }
+
+        function searchProducts() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const results = document.getElementById('results');
+            results.innerHTML = "";
+
+            if (query === "") return;
+
+            const filtered = products.filter(p => p.name.toLowerCase().includes(query));
+            
+            // Sort by price (lowest first)
+            filtered.sort((a, b) => a.price - b.price);
+
+            filtered.forEach(p => {
+                results.innerHTML += `
+                    <div class="product-card">
+                        <div>
+                            <span class="store-name">${p.store}</span>
+                            <span class="item-name">${p.name}</span>
+                        </div>
+                        <div class="price">${p.price.toFixed(2)} <small>SAR</small></div>
+                    </div>
+                `;
+            });
+        }
+
+        function addProduct() {
+            const name = document.getElementById('seller-item').value;
+            const price = parseFloat(document.getElementById('seller-price').value);
+            const store = document.getElementById('seller-store').value;
+
+            if (name && price && store) {
+                products.push({ name, price, store });
+                alert("Product listed successfully!");
+                showView('consumer');
+            }
+        }
+    </script>
+</body>
+</html>
